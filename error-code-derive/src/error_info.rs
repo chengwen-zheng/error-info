@@ -1,5 +1,5 @@
 use darling::{
-    ast::{Data, Fields},
+    ast::{Data, Fields, Style},
     FromDeriveInput, FromVariant,
 };
 use quote::quote;
@@ -14,7 +14,6 @@ struct ErrorData {
     prefix: String,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, FromVariant)]
 #[darling(attributes(error_info))]
 struct EnumVariants {
@@ -46,15 +45,20 @@ pub(crate) fn process_error_info(input: syn::DeriveInput) -> proc_macro2::TokenS
         .map(|v| {
             let EnumVariants {
                 ident,
-                fields: _,
+                fields,
                 code,
                 app_code,
                 client_msg,
             } = v;
             let code = format!("{}{}", prefix, code);
+            let varint_code = match fields.style {
+                Style::Unit => quote! {  #name::#ident },
+                Style::Tuple => quote! {  #name::#ident(_) },
+                Style::Struct => quote! {  #name::#ident{..} },
+            };
             quote! {
-                #name::#ident(_) => {
-                    ErrorInfo::try_new(
+                #varint_code => {
+                    ErrorInfo::new(
                         #app_code,
                         #code,
                         #client_msg,
@@ -70,7 +74,7 @@ pub(crate) fn process_error_info(input: syn::DeriveInput) -> proc_macro2::TokenS
         impl #generics ToErrorInfo for #name #generics {
             type T = #app_type;
 
-            fn to_error_info(&self) -> Result<ErrorInfo<Self::T>, <Self::T as std::str::FromStr>::Err> {
+            fn to_error_info(&self) -> ErrorInfo<Self::T> {
                 match self {
                     #(#code),*
                 }
@@ -104,6 +108,8 @@ mod tests {
         let parsed = syn::parse_str(input).unwrap();
         let info = ErrorData::from_derive_input(&parsed).unwrap();
         println!("{:#?}", info);
+        assert_eq!(info.ident.to_string(), "MyError");
+        assert_eq!(info.prefix, "01");
 
         let code = process_error_info(parsed);
         println!("{}", code);
