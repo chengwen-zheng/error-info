@@ -93,3 +93,5 @@ topo_order = false
 sort_commits = "oldest"
 # limit the number of commits included in the changelog.
 # limit_commits = 42
+
+manual-unwrap-or-default = "allow"
