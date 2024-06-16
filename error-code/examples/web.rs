@@ -61,10 +61,11 @@ impl IntoResponse for AppError {
         let info = self.to_error_info();
         let status = info.app_code;
 
+        // server log
         if status.is_server_error() {
-            warn!("{}", info);
+            warn!("{:?}", info);
         } else {
-            info!("{}", info);
+            info!("{:?}", info);
         }
         // use client-facing message
         Response::builder()
