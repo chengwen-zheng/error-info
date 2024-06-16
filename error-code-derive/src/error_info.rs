@@ -14,6 +14,7 @@ struct ErrorData {
     prefix: String,
 }
 
+#[allow(clippy::unwrap_or_default)]
 #[derive(Debug, FromVariant)]
 #[darling(attributes(error_info))]
 struct EnumVariants {

@@ -9,6 +9,3 @@ error-code = { path = "./error-code" }
 error-code-derive = { path = "./error-code-derive" }
 http = "1"
 thiserror = "1"
-
-[workspace.lints.clippy]
-manual-unwrap-or-default = "allow"
