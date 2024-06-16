@@ -13,3 +13,6 @@ darling = "0.20.8"
 proc-macro2 = "1.0.79"
 quote = "1.0.35"
 syn = { version = "2.0.57", features = ["extra-traits"] }
+
+[lints]
+workspace = true
